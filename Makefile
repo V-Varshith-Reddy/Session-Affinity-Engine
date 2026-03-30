@@ -29,16 +29,21 @@ TEST_OBJ   = $(BUILD_DIR)/test_all.o
 # Binaries
 TARGET     = session_engine
 TEST_BIN   = run_tests
+DOCKER_BIN = session_engine_docker
 
 # ─────────────────────────────────────────────────────────────
 # Build targets
 # ─────────────────────────────────────────────────────────────
 
-.PHONY: all clean test run run-test dirs debug
+.PHONY: all clean test run run-test dirs debug docker
 
 ## Build the main simulation binary
 all: dirs $(TARGET)
 	@echo "Build complete: ./$(TARGET)"
+
+## Build the docker standalone binary
+docker: dirs $(DOCKER_BIN)
+	@echo "Build complete: ./$(DOCKER_BIN)"
 
 ## Build and run tests
 test: dirs $(TEST_BIN)
@@ -60,7 +65,7 @@ run-test: test
 
 ## Clean build artifacts
 clean:
-	rm -rf $(BUILD_DIR) $(TARGET) $(TEST_BIN)
+	rm -rf $(BUILD_DIR) $(TARGET) $(TEST_BIN) $(DOCKER_BIN)
 	@echo "Cleaned."
 
 # ─────────────────────────────────────────────────────────────
@@ -85,8 +90,17 @@ $(TEST_BIN): $(OBJS) $(TEST_OBJ)
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
+## Link the docker binary
+$(DOCKER_BIN): $(OBJS) $(BUILD_DIR)/main1.o
+	$(CXX) $(CXXFLAGS) -o $@ $^
+	@echo "Linked: $@"
+
 ## Compile main
 $(BUILD_DIR)/main.o: $(SRC_DIR)/main.cpp
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
+
+## Compile docker main
+$(BUILD_DIR)/main1.o: $(SRC_DIR)/main1.cpp
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
 ## Compile tests
