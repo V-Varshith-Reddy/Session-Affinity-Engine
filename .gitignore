@@ -1,0 +1,17 @@
+# Build artifacts
+build/
+session_engine
+run_tests
+
+# Logs (generated at runtime)
+logs/
+
+# HTML generated from markdown
+Presentation_final.html
+
+# macOS
+.DS_Store
+
+# IDE
+.vscode/
+.idea/

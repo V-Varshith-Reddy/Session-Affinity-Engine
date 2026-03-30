@@ -1,0 +1,115 @@
+Question:
+
+Design and implement a small Session Affinity Engine that simulates how a Layer-4 load balancer or gateway maintains sticky sessions based on the 5-tuple:
+
+ 
+
+src_ip, src_port, dst_ip, dst_port, protocol
+
+ 
+
+Because this is a mini project running on a laptop, the engine will not read real packets from the network stack.
+
+Instead, the client application will send the 5-tuple as part of the request payload, and your service will:
+
+  1.  Treat each unique 5-tuple as a session.
+
+  2.  Assign that session to a particular service path (e.g., backend instance or route).
+
+  3.  Ensure session stickiness: repeated requests with the same 5-tuple are routed to the same path.
+
+  4.  Track and log the path history for each session, especially when the path changes (e.g., failover, rebalancing).
+
+ 
+
+You are free to decide:
+
+  •  how sessions are keyed and stored
+
+  •  how paths/backends are represented and selected
+
+  •  how/when path changes happen
+
+  •  how session expiry and cleanup are managed
+
+  •  how clients interact with this engine (HTTP API, CLI, etc.)
+
+ 
+
+The project does not prescribe specific data structures or algorithms — your choices and reasoning are part of the evaluation.
+
+ 
+
+Goals:
+
+1.  Maintain per-session stickiness using the 5-tuple (src_ip, src_port, dst_ip, dst_port, protocol) so that each unique session always maps to the same assigned path.
+
+  2.  Each incoming request must look up the session using its 5-tuple and either reuse the existing path or create a new session–path mapping if none exists.
+
+  3.  Use an efficient data structure for session lookup, path assignment, and quick updates, minimizing latency even with many active sessions.
+
+  4.  Maintain a path history per session and update it whenever the assigned path changes (e.g., due to simulated backend change or rebalancing).
+
+  5.  Make the module highly performant by ensuring that session lookups, updates, and expirations do not require scanning the entire session table.
+
+  6.  Although the project simulates L4 session affinity in distributed load balancers, your implementation can focus on a single logical node while handling all conceptual elements of path consistency, failover, and stickiness.
+
+  7.  Your client should be able to generate 5-tuple traffic of varying volume, burstiness, and patterns to test stickiness, path assignment, and rebalancing scenarios.
+
+  8.  The application should expose a minimal configuration interface that allows setting policy per session or per client, such as forcing a new path assignment, blocking a session, or adjusting expiry/timeout values.
+
+  9.  This configuration interface must not reload or disrupt the entire session table; it should update behavior dynamically while the system continues routing traffic normally.
+
+  10.  Provide logging for debugging and auditing, e.g., session creation, path assignment, path changes, and session expiry.
+
+  11.  Include security considerations for the client–service interaction and protection of the session affinity engine against malformed 5-tuple data or abusive traffic patterns.
+
+  12.  Optional bonus features:
+
+a) Consistent hashing for stable path assignment
+
+b) Session timeout via time-wheel or heap-based scheduler
+
+c) Multi-path failover or weighted path selection
+
+d) Fairness or load-based path selection
+
+e) Evasion-resistant session identification (e.g., spoof detection logic)
+
+f) Containerization (Alpine/Ubuntu base)
+
+ 
+
+----
+
+
+
+This task/project has to be implemented in C++ . With the above requirements, 
+
+In our architecture, i would have a client which interacts with our load balancer instance, our load balancer then tries to route the incoming request into one of the backend servers(instances of processors) based on consistent hashing technique to ensure proper load balancing of incoming requests. It should also take care of sticky sessions, if same client (tuple of 5 makes a request, we should should route it to same backen server which served it earlier). Also consider, session timeouts Also our load balancer can be a single point of failure, so make sure that when a backend server is down we route its requests evenly onto the other ones, if load balancer goes down, we will have another loadbalancer instance taking over (while the 1st one was working this one will not be active)
+
+
+
+Provide a C++ code with these requirements, with the no. of backend servers, session timouts , request rate limit configurable (i.e we can change it in config file or at its enum / #define ) so for these values use its variables instead of values. LEts say no. of backend servers are 8 .. use NUM_BACKEND_SERVERS in the code everywhere.. and define this as #define NUM_BACKEND_SERVERS 8 at the declarations so that, we can just change this whenever we want . 
+
+
+
+Provide the C++ code for this  with a proper directoy 
+
+Run Commands and ALso how to test it 
+
+Make sure that you add necessary logging based on the command line args , in command line args if we have one of the parameter to on logging or off logging, based on that, our code should log .. 
+
+
+
+Also log the outputs to a seperate file instead of terminal .
+
+
+
+Do proper error handling and exception handling.
+
+
+
+Also, as we need to make sure that latency is critical , i feel it is better to use websocket connections instead of polling for requests of a client .. SUggest if UDP is better to use than it .. 
+
+Tell me which is the best option to use for protocol and using it provide the best code
